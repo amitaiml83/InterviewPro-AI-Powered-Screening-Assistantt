@@ -6,7 +6,7 @@ import os
 import re
 
 # Your Hugging Face API key
-api_key = "your api from huggingface"
+api_key = "your hugging face api"
 
 # Setting up Hugging Face Endpoint
 repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
@@ -77,6 +77,7 @@ def check_answer_alignment(question, answer):
         - **If the answer is mostly correct**: "Thank you for your response. Your answer is mostly correct and aligns well with the question. You can proceed to the next question."
         - **If the answer is partially correct**: "Thank you for your response. Your answer is partially correct but could use some improvement. Here's a hint to guide you: [Provide specific suggestions to improve the answer]. Please refine your response or proceed to the next question."
         - **If the answer is incorrect**: "Thank you for your response. It's a good attempt, but the answer is not correct. Here's a hint to help you improve: [Provide suggestions to correct or enhance the answer]. Please refine your response or proceed to the next question."
+    
     Provide professional and constructive feedback to encourage the candidate's improvement or help them proceed confidently to the next step."""
 
     try:
@@ -236,10 +237,19 @@ elif st.session_state.step == 8:
     st.header("Step 8: Technical Questions")
     if not st.session_state.questions:
         tech_stack = st.session_state.candidate_data['tech_stack']
+        Years_of_Experience=st.session_state.candidate_data['experience'] 
+        Desired_Position=st.session_state.candidate_data['position']
+
         prompt = f"""
-        You are an expert technical recruiter. Generate 3-5 questions to evaluate a candidate's skills.
-        
-        Tech Stack: {tech_stack}
+        You are an expert technical recruiter. Your task is to assess a candidate's technical skills and work experience.
+
+        Candidate Details:
+        - Years of Experience: {Years_of_Experience} years
+        - Desired Position: {Desired_Position}
+        - Tech Stack: {tech_stack}
+
+        **Based on the declared tech stack, Year of Experience  and Desired position , generate a set of 3 technical questions tailored to assess the candidate’s proficiency in each specified technology  with experience level.**
+        also ask question that can evaluate candidate problem solving skills.
         """
         try:
             response = llm.invoke(prompt)
@@ -303,7 +313,6 @@ elif st.session_state.step == 8:
         # Prepare the data to save
         candidate_name = st.session_state.candidate_data.get("name", "unknown_candidate")
         question_answer_data = {}
-
         for i, question in enumerate(st.session_state.questions):
             question_answer_data[f"Q{i+1}"] = {
                 "question": question,
