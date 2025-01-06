@@ -1,0 +1,9 @@
+streamlit
+openai
+huggingface_hub
+transformers
+accelerate
+bitsandbytes
+langchain
+dot-env
+
