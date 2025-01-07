@@ -6,11 +6,22 @@ import os
 import re
 
 # Your Hugging Face API key
-api_key = "your hugging face api"
+api_key = "your api from hugging face "
+
 
 # Setting up Hugging Face Endpoint
 repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
-llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=300, temperature=0.4, token=api_key)
+
+llm = HuggingFaceEndpoint(
+    repo_id=repo_id, 
+    temperature=0.4,  # Pass temperature directly
+    model_kwargs={
+        "max_length": 300,
+        "token": api_key
+    }
+)
+
+
 
 # Utility Functions
 def anonymize_data(data):
@@ -18,7 +29,7 @@ def anonymize_data(data):
 
 def evaluate_answer(question, answer):
     prompt = f"""
-        You are an AI assistant tasked with evaluating a candidate's response to a technical interview question. Your goal is to provide a score between 0 and 10 based on the following criteria:
+        You are an AI assistant tasked with evaluating a candidate's response to a technical interview question. **Your goal is to provide a score between 0 and 10 based on the following criteria**:
 
         **1. Relevance (0-3 points)**:
         - Does the answer directly address the question asked?
@@ -51,7 +62,7 @@ def evaluate_answer(question, answer):
     """
 
     response = llm.invoke(prompt)
-    print(response.strip())
+    # print(response.strip())
     match = re.search(r"(\d+(\.\d+)?)", response)
     if match:
         score = float(match.group(1))
@@ -116,12 +127,13 @@ for i, step in enumerate(steps):
 
 # Main UI
 st.title("TalentScout Hiring Assistant")
-st.write("Welcome to TalentScout! Please follow the steps below to complete your screening process.")
+# st.write("Welcome to TalentScout!")
 
 # Greeting and Introduction
 greeting_prompt = """
-Hello! 👋 I'm your TalentScout Assistant. I'm here to guide you through the screening process, step by step. 
-I'll ask you a few questions to gather some basic details. Let's get started!
+Hello and welcome! 👋 I'm your TalentScout Assistant, here to guide you through the screening process. I’ll ask you a few questions to gather some basic information and evaluate your technical skills. This is a great opportunity for you to showcase your abilities and experience.
+
+Let’s get started! 😊 If you need any assistance, feel free to ask.
 """
 
 # Displaying greeting message
@@ -133,7 +145,7 @@ st.progress(progress)
 
 # Form Input Fields with interactive prompts
 if st.session_state.step == 1:
-    st.header("Step 1: Full Name")
+    # st.header("Full Name")
     full_name_prompt = """
     Let's start with your full name. What's your name? 😊
     """
@@ -147,7 +159,7 @@ if st.session_state.step == 1:
 
 
 elif st.session_state.step == 2:
-    st.header("Email Address")
+    # st.header("Email Address")
     email_prompt = """
     Great! Now, could you please share your email address? 📧 This will help us contact you if needed.
     """
@@ -161,7 +173,7 @@ elif st.session_state.step == 2:
 
 
 elif st.session_state.step == 3:
-    st.header("Step 3: Phone Number")
+    # st.header("Phone Number")
     phone_prompt = """
     Next, could you please provide your phone number? 📱 It's optional, but it would be helpful in case we need to reach you quickly.
     """
@@ -175,7 +187,7 @@ elif st.session_state.step == 3:
 
 
 elif st.session_state.step == 4:
-    st.header("Step 4: Years of Experience")
+    # st.header("Step 4: Years of Experience")
     experience_prompt = """
     How many years of professional experience do you have? 🧑‍💻 Please enter a number (e.g., 3 years).
     """
@@ -185,11 +197,11 @@ elif st.session_state.step == 4:
     if experience and st.button("Send ➡️"):
         st.session_state.candidate_data["experience"] = experience
         st.session_state.step += 1
-        st.write(f"Got it! You have {experience} years of experience wonderful. Let's continue.")
+        st.write(f"Got it! You have {experience} years of experience wonderfull. Let's continue.")
 
 
 elif st.session_state.step == 5:
-    st.header("Step 5: Desired Position(s)")
+    # st.header("Step 5: Desired Position(s)")
     position_prompt = """
     What position(s) are you applying for? Feel free to mention one or more roles you’re interested in. 🧐
     """
@@ -203,7 +215,7 @@ elif st.session_state.step == 5:
 
 
 elif st.session_state.step == 6:
-    st.header("Step 6: Current Location")
+    # st.header("Step 6: Current Location")
     location_prompt = """
     Where are you currently located? 🌍 Knowing your location helps us with scheduling and potential relocation needs.
     """
@@ -217,7 +229,7 @@ elif st.session_state.step == 6:
 
 
 elif st.session_state.step == 7:
-    st.header("Step 7: Tech Stack")
+    # st.header("Step 7: Tech Stack")
     tech_stack_prompt = """
     Finally, let's talk about your tech stack! 💻 What technologies do you specialize in? Please list them (e.g., Python, Django, SQL).
     """
@@ -227,7 +239,7 @@ elif st.session_state.step == 7:
     if tech_stack and st.button("Send ➡️"):
         st.session_state.candidate_data["tech_stack"] = tech_stack
         st.session_state.step += 1
-        st.write(f"Awesome! You've listed your tech stack as {tech_stack}. You're all set!")
+        st.write(f"Awesome! You've listed your tech stack as {tech_stack}. You're all set! just give answer of few question to complete the screening round.")
 
 
 
@@ -237,8 +249,8 @@ elif st.session_state.step == 8:
     st.header("Step 8: Technical Questions")
     if not st.session_state.questions:
         tech_stack = st.session_state.candidate_data['tech_stack']
-        Years_of_Experience=st.session_state.candidate_data['experience'] 
-        Desired_Position=st.session_state.candidate_data['position']
+        Years_of_Experience = st.session_state.candidate_data['experience'] 
+        Desired_Position = st.session_state.candidate_data['position']
 
         prompt = f"""
         You are an expert technical recruiter. Your task is to assess a candidate's technical skills and work experience.
@@ -248,15 +260,22 @@ elif st.session_state.step == 8:
         - Desired Position: {Desired_Position}
         - Tech Stack: {tech_stack}
 
-        **Based on the declared tech stack, Year of Experience  and Desired position , generate a set of 3 technical questions tailored to assess the candidate’s proficiency in each specified technology  with experience level.**
-        also ask question that can evaluate candidate problem solving skills.
+        Follow these rules:
+        - Do not include the name of the technology in the question itself.
+        - Directly generate technical questions related to the candidate's specified technologies, based on their experience level and desired position.
+        - The questions should be specific to the technologies they have experience with.
+        - Each question should be a standalone prompt.
+
+        **Generate only 3 technical questions tailored to assess the candidate’s proficiency based on their tech stack, years of experience, and desired position.**
         """
+
         try:
             response = llm.invoke(prompt)
             st.session_state.questions = [q.strip() for q in response.split("\n") if q.strip()]
         except Exception as e:
             st.error("Failed to generate questions. Please try again later.")
-            st.stop()  # Stop execution if no questions are available
+            st.stop()
+  # Stop execution if no questions are available
 
     index = st.session_state.current_question_index
     
@@ -339,11 +358,8 @@ elif st.session_state.step == 8:
         #     st.write(f"**Q{i + 1}:** {st.session_state.questions[i]}")
         #     st.write(f"**Answer:** {answer}")
         st.write(f"**Average score:** {average_score}/10")
-        st.header("We will review your information and contact you with the next steps.")
-# # Detect Exit Keywords
-# exit_keywords = ["exit", "quit", "bye", "end"]
-# user_input = st.text_input("Type something to interact, or type 'exit' to end the conversation:")
-
-# if any(keyword in user_input.lower() for keyword in exit_keywords):
-#     st.write("Thank you for your time! 😊 We'll contact you with the next steps. Goodbye!")
-#     st.stop()
+        conclude_prompt="""Thank you for your time and effort today! 🙏 It was great getting to know more about you and your skills. 
+        We appreciate your responses and will review your answers carefully.Our team will reach out to you with the next steps in the hiring process soon. 
+        If you have any further questions or need additional information, feel free to contact us.
+        Best of luck, and we hope to speak with you again soon! 😊"""
+        st.write(conclude_prompt)
