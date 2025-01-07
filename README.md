@@ -11,6 +11,10 @@ The **Hiring Assistant Chatbot** is a Streamlit-based application designed to st
 - Scoring candidate responses and saving the results for further review.
 
 The chatbot leverages **LangChain's Hugging Face endpoint integration** and **mistralai/Mistral-7B-Instruct-v0.3** for prompt-based question generation and response evaluation, ensuring a seamless and intelligent interview process.
+![image](https://github.com/user-attachments/assets/69f77e23-de3c-48db-bb55-a048f0250b78)
+![Screenshot (343)](https://github.com/user-attachments/assets/2c57867e-a017-42f0-9999-545bd3e9fde7)
+
+
 
 ---
 
