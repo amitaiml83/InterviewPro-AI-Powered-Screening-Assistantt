@@ -6,8 +6,7 @@ import os
 import re
 
 # Your Hugging Face API key
-api_key = "your api from hugging face "
-
+api_key = "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"
 
 # Setting up Hugging Face Endpoint
 repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
@@ -26,6 +25,16 @@ llm = HuggingFaceEndpoint(
 # Utility Functions
 def anonymize_data(data):
     return hashlib.sha256(data.encode()).hexdigest()
+
+def fallback_handler(input_type):
+    fallback_prompt = f"""
+    Your are AI chatbots assistant  and your task is to provide a **helpful message for user they have entered invalid** input. **after analysing the input_type**
+    **Input_type:** {input_type}
+    - ** give only one message responce that are releted to given input type**
+    """
+    response = llm.invoke(fallback_prompt)
+    # print(response)
+    return response.strip()
 
 def evaluate_answer(question, answer):
     prompt = f"""
@@ -146,102 +155,148 @@ st.progress(progress)
 # Form Input Fields with interactive prompts
 if st.session_state.step == 1:
     # st.header("Full Name")
-    full_name_prompt = """
-    Let's start with your full name. What's your name? 😊
+    prompt=f"""
+    give me message in conversational way for chatbots like to screen for user can inter their full name. 😊
     """
-    full_name = st.text_input(full_name_prompt)
+    res=llm.invoke(prompt)
+    st.write(res.strip())
+    full_name = st.text_input("enter you name here")
 
     # Replacing "Next Step" button with "Send" button
-    if full_name and st.button("Send ➡️"):
-        st.session_state.candidate_data["name"] = anonymize_data(full_name)
-        st.session_state.step += 1
-        st.write(f"Thank you, {full_name}! welcome {full_name} and Let's move to the question.")
+    if full_name:
+        if re.match(r"^[a-zA-Z\s]+$", full_name):  # Validate name (only letters and spaces)
+            st.session_state.candidate_data["name"] = anonymize_data(full_name)
+            st.session_state.step += 1
+            st.write(f"Thank you, {full_name}! welcome {full_name} and Let's move to the question.")
+            st.button("Send ➡️")
+        else:
+            st.write(fallback_handler("Full Name"))
 
 
 elif st.session_state.step == 2:
     # st.header("Email Address")
-    email_prompt = """
-    Great! Now, could you please share your email address? 📧 This will help us contact you if needed.
+    prompt=f"""
+    give me message in conversational way for chatbots like to screen for user can inter their Email address. 😊
     """
-    email = st.text_input(email_prompt)
+    res = llm.invoke(prompt)
+    # print(res)
+    st.write(res.strip())
+
+    email = st.text_input("enter your email here")
 
     # Replacing "Next Step" button with "Send" button
-    if email and st.button("Send ➡️"):
-        st.session_state.candidate_data["email"] = anonymize_data(email)
-        st.session_state.step += 1
-        st.write(f"Got it! We've recorded your email as {email} for further update. Next, let's move on.")
+    if email:
+        if re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):  # Validate email
+            st.session_state.candidate_data["email"] = anonymize_data(email)
+            st.session_state.step += 1
+            st.write(f"Got it! We've recorded your email as {email} for further update. Next, let's move on.")
+            st.button("Send ➡️")
+        else:
+            st.write(fallback_handler(input_type="Email Address"))
 
 
 elif st.session_state.step == 3:
     # st.header("Phone Number")
     phone_prompt = """
-    Next, could you please provide your phone number? 📱 It's optional, but it would be helpful in case we need to reach you quickly.
+    give me message in conversational way for chatbots like to screen for user can inter their valid phone number. say thankyou about previous input. 😊
     """
-    phone = st.text_input(phone_prompt)
+    res=llm.invoke(phone_prompt)
+    # print(res)
+    st.write(res)
+    phone = st.text_input("enter your valid phone number here")
 
     # Replacing "Next Step" button with "Send" button
-    if phone and st.button("Send ➡️"):
-        st.session_state.candidate_data["phone"] = anonymize_data(phone)
-        st.session_state.step += 1
-        st.write(f"Thanks! We've noted your phone number as {phone} for futher communication. Moving on!")
+    if phone:
+        if re.match(r"^\d{10}$", phone):  # Validate 10-digit phone number
+            st.session_state.candidate_data["phone"] = anonymize_data(phone)
+            st.session_state.step += 1
+            st.write(f"Thanks! We've noted your phone number as {phone} for futher communication. Moving on!")
+            st.button("Send ➡️")
+        else:
+            st.write(fallback_handler("Phone Number"))
 
 
 elif st.session_state.step == 4:
     # st.header("Step 4: Years of Experience")
     experience_prompt = """
-    How many years of professional experience do you have? 🧑‍💻 Please enter a number (e.g., 3 years).
+    give me message in conversational way for chatbots like to screen for user can inter their total number of technical experiencein year. say thankyou about previous input. 😊
     """
-    experience = st.number_input(experience_prompt, min_value=0, max_value=50, step=1)
+    res=llm.invoke(experience_prompt)
+    st.write(res)
+    experience = st.number_input("enter a number here", min_value=0, max_value=50, step=1)
 
     # Replacing "Next Step" button with "Send" button
-    if experience and st.button("Send ➡️"):
+    if experience:
         st.session_state.candidate_data["experience"] = experience
         st.session_state.step += 1
         st.write(f"Got it! You have {experience} years of experience wonderfull. Let's continue.")
+        st.button("Send ➡️")
 
 
 elif st.session_state.step == 5:
     # st.header("Step 5: Desired Position(s)")
     position_prompt = """
-    What position(s) are you applying for? Feel free to mention one or more roles you’re interested in. 🧐
+        give me message in conversational way for chatbots like to screen for user can inter their position(s)  user applying for? Feel free to mention one or more roles you’re interested in. 🧐
+        **give only one message paragraph**
     """
-    position = st.text_input(position_prompt)
+    res=llm.invoke(position_prompt)
+    st.write(res)
+    position = st.text_input("enter a position applying for")
 
     # Replacing "Next Step" button with "Send" button
-    if position and st.button("Send ➡️"):
-        st.session_state.candidate_data["position"] = position
-        st.session_state.step += 1
-        st.write(f"Thank you! You've applied for the {position} position. Let's move to the next.")
+    if position:
+        if len(position.strip()) > 2 and not re.match(r"^\d+$", position.strip()):  # Ensure meaningful input
+            st.session_state.candidate_data["position"] = position
+            st.session_state.step += 1
+            st.write(f"Thank you! You've applied for the {position} position. Let's move to the next.")
+            st.button("Send ➡️")
+
+        else:
+            st.write(fallback_handler("Desired Position for tech role"))
 
 
 elif st.session_state.step == 6:
     # st.header("Step 6: Current Location")
     location_prompt = """
-    Where are you currently located? 🌍 Knowing your location helps us with scheduling and potential relocation needs.
+    give me message in conversational way for chatbots like to screen for user can inter their currect location where they lived. say thankyou about previous input. 😊
     """
-    location = st.text_input(location_prompt)
+    res=llm.invoke(location_prompt)
+    st.write(res)
+
+    location = st.text_input("please enter a current location")
 
     # Replacing "Next Step" button with "Send" button
-    if location and st.button("Send ➡️"):
-        st.session_state.candidate_data["location"] = location
-        st.session_state.step += 1
-        st.write(f"Thanks! We have your location as {location}. We're almost done!")
+    if location:
+        if len(location.strip()) > 1 and not re.match(r"^\d+$", location.strip()):
+            st.session_state.candidate_data["location"] = location
+            st.session_state.step += 1
+            st.write(f"Thanks! We have your location as {location}. We're almost done!")
+            st.button("Send ➡️")
+        else:
+            st.write(fallback_handler("Current Location"))
 
 
 elif st.session_state.step == 7:
     # st.header("Step 7: Tech Stack")
     tech_stack_prompt = """
-    Finally, let's talk about your tech stack! 💻 What technologies do you specialize in? Please list them (e.g., Python, Django, SQL).
+    give me message in conversational way for chatbots like to screen for user can inter their technology and skills they have specialize in? Please list them (e.g., Python, Django, SQL). and say thanks to user  for all the input till they provided.
+    **give only one paragraph message**
     """
-    tech_stack = st.text_area(tech_stack_prompt)
 
-    # Replacing "Next Step" button with "Send" button
-    if tech_stack and st.button("Send ➡️"):
-        st.session_state.candidate_data["tech_stack"] = tech_stack
-        st.session_state.step += 1
-        st.write(f"Awesome! You've listed your tech stack as {tech_stack}. You're all set! just give answer of few question to complete the screening round.")
+    res= llm.invoke(tech_stack_prompt)
+    st.write(res)
 
+    tech_stack = st.text_area("enter a tech stack here")
 
+    if tech_stack:
+        if len(tech_stack.strip()) > 0 and not re.match(r"^\d+$", tech_stack.strip()):
+            st.session_state.candidate_data["tech_stack"] = tech_stack
+            st.session_state.step += 1
+            st.write(f"Awesome! You've listed your tech stack as {tech_stack}. You're all set! just give answer of few question to complete the screening round.")
+            st.button("Send ➡️")
+        else:
+            st.write(fallback_handler("Tech Stack"))
+    
 
 
 # Generate and Display Questions
@@ -358,6 +413,7 @@ elif st.session_state.step == 8:
         #     st.write(f"**Q{i + 1}:** {st.session_state.questions[i]}")
         #     st.write(f"**Answer:** {answer}")
         st.write(f"**Average score:** {average_score}/10")
+
         conclude_prompt="""Thank you for your time and effort today! 🙏 It was great getting to know more about you and your skills. 
         We appreciate your responses and will review your answers carefully.Our team will reach out to you with the next steps in the hiring process soon. 
         If you have any further questions or need additional information, feel free to contact us.
