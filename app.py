@@ -6,7 +6,7 @@ import os
 import re
 
 # Your Hugging Face API key
-api_key = "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"
+api_key = "your hugging face api"
 
 # Setting up Hugging Face Endpoint
 repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
